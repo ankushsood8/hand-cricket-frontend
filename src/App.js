@@ -8,7 +8,7 @@ import CreateRoom from './CreateRoom';
 import HomePage from './HomePage';
 
 
-const socket = io('localhost:5000/')
+const socket = io('https://hand-cricket-be.onrender.com/')
 function App() {
   const [userName, setUserName] = useState('');
   const [roomId, setRoomId] = useState('');
