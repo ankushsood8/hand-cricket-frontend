@@ -9,7 +9,7 @@ import HomePage from './HomePage';
 import GameComponent from './GameComponent';
 
 
-const socket = io('localhost:5000/')
+const socket = io('https://hand-cricket-be.onrender.com/')
 function App() {
   const [userName, setUserName] = useState('');
   const [roomId, setRoomId] = useState('');
