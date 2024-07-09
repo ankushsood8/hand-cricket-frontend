@@ -9,7 +9,7 @@ import HomePage from './HomePage';
 import GameComponent from './GameComponent';
 
 
-const socket = io('https://hand-cricket-be.onrender.com/')
+const socket = io('localhost:5000/')
 function App() {
   const [userName, setUserName] = useState('');
   const [roomId, setRoomId] = useState('');
@@ -192,7 +192,6 @@ function App() {
 };
 
 const createOffer = async () => {
-  initializePeerConnection();
     if (!peerConnection) {
         console.error('Peer connection not established.');
         return;
@@ -206,7 +205,6 @@ const createOffer = async () => {
         console.error('Error creating offer:', error);
     }
 };
-
 
 
 
@@ -234,7 +232,8 @@ const createOffer = async () => {
       {playMatch &&
        <>
         <GameComponent roomId={roomId} activeRooms={activeRooms} playerMove={playerMove} isDisabled={isDisabled}></GameComponent>
-        <button onClick={createOffer}>Join Call</button>
+        <button className='btn btn-primary ' onClick={initializePeerConnection} >Initialize Connection to Join</button>
+        <button className='btn btn-primary ms-2' onClick={createOffer} disabled={!peerConnection}>Join Call</button>
         <audio ref={localAudioRef} autoPlay muted />
         <audio ref={remoteAudioRef} autoPlay />
         </>
