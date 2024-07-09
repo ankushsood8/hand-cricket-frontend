@@ -207,12 +207,6 @@ const createOffer = async () => {
     }
 };
 
-const cleanupPeerConnection = () => {
-    if (peerConnection) {
-        peerConnection.close();
-        setPeerConnection(null); // Reset peerConnection
-    }
-};
 
 
 
