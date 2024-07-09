@@ -7,6 +7,8 @@ import CreateOrJoinRoom from './CreateOrJoinRoom';
 import CreateRoom from './CreateRoom';
 import HomePage from './HomePage';
 import GameComponent from './GameComponent';
+import Button from '@mui/material/Button';
+import CallIcon from '@mui/icons-material/Call';
 
 
 const socket = io('https://hand-cricket-be.onrender.com')
@@ -77,6 +79,7 @@ function App() {
       setPlayMatch(true);
       setRoomId(roomId);
       setActiveRooms(activeRooms);
+      initializePeerConnection();
     });
 
     socket.on('score updated', (activeRooms) => {
@@ -136,75 +139,76 @@ function App() {
   
   const initializePeerConnection = async () => {
     try {
-        const pc = new RTCPeerConnection({
-            iceServers: [
-                { urls: 'stun:stun.l.google.com:19302' } // Using a public STUN server
-            ]
-        });
+      const pc = new RTCPeerConnection({
+        iceServers: [
+          { urls: 'stun:stun.l.google.com:19302' } // Using a public STUN server
+        ]
+      });
 
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        localAudioRef.current.srcObject = stream;
-        stream.getTracks().forEach(track => pc.addTrack(track, stream));
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      localAudioRef.current.srcObject = stream;
+      stream.getTracks().forEach(track => pc.addTrack(track, stream));
 
-        pc.onicecandidate = (event) => {
-            if (event.candidate) {
-                socket.emit('candidate', event.candidate);
-            }
-        };
+      pc.onicecandidate = (event) => {
+        if (event.candidate) {
+          socket.emit('candidate', event.candidate);
+        }
+      };
 
-        pc.ontrack = (event) => {
-            if (remoteAudioRef.current) {
-                remoteAudioRef.current.srcObject = event.streams[0];
-            }
-        };
+      pc.ontrack = (event) => {
+        if (remoteAudioRef.current) {
+          remoteAudioRef.current.srcObject = event.streams[0];
+        }
+      };
 
-        socket.on('offer', async (offer) => {
-            try {
-                await pc.setRemoteDescription(new RTCSessionDescription(offer));
-                const answer = await pc.createAnswer();
-                await pc.setLocalDescription(answer);
-                socket.emit('answer', answer);
-            } catch (error) {
-                console.error('Error setting remote description or creating answer:', error);
-            }
-        });
+      socket.on('offer', async (offer) => {
+        try {
+          await pc.setRemoteDescription(new RTCSessionDescription(offer));
+          const answer = await pc.createAnswer();
+          await pc.setLocalDescription(answer);
+          socket.emit('answer', answer);
+        } catch (error) {
+          console.error('Error setting remote description or creating answer:', error);
+        }
+      });
 
-        socket.on('answer', async (answer) => {
-            try {
-                await pc.setRemoteDescription(new RTCSessionDescription(answer));
-            } catch (error) {
-                console.error('Error setting remote description:', error);
-            }
-        });
+      socket.on('answer', async (answer) => {
+        try {
+          await pc.setRemoteDescription(new RTCSessionDescription(answer));
+        } catch (error) {
+          console.error('Error setting remote description:', error);
+        }
+      });
 
-        socket.on('candidate', async (candidate) => {
-            try {
-                await pc.addIceCandidate(new RTCIceCandidate(candidate));
-            } catch (error) {
-                console.error('Error adding ice candidate:', error);
-            }
-        });
+      socket.on('candidate', async (candidate) => {
+        try {
+          await pc.addIceCandidate(new RTCIceCandidate(candidate));
+        } catch (error) {
+          console.error('Error adding ice candidate:', error);
+        }
+      });
 
-        setPeerConnection(pc); // Set peerConnection after it's fully initialized
+      setPeerConnection(pc); // Set peerConnection after it's fully initialized
     } catch (error) {
-        console.error('Error initializing peer connection:', error);
+      console.error('Error initializing peer connection:', error);
     }
-};
+  };
 
-const createOffer = async () => {
+  const createOffer = async () => {
     if (!peerConnection) {
-        console.error('Peer connection not established.');
-        return;
+      console.error('Peer connection not established.');
+      return;
     }
 
     try {
-        const offer = await peerConnection.createOffer();
-        await peerConnection.setLocalDescription(offer);
-        socket.emit('offer', offer);
+      const offer = await peerConnection.createOffer();
+      await peerConnection.setLocalDescription(offer);
+      console.log('Offer created:', offer)
+      socket.emit('offer', offer);
     } catch (error) {
-        console.error('Error creating offer:', error);
+      console.error('Error creating offer:', error);
     }
-};
+  };
 
 
 
@@ -232,10 +236,19 @@ const createOffer = async () => {
       {playMatch &&
        <>
         <GameComponent roomId={roomId} activeRooms={activeRooms} playerMove={playerMove} isDisabled={isDisabled}></GameComponent>
-        <button className='btn btn-primary ' onClick={initializePeerConnection} >Initialize Connection to Join</button>
-        <button className='btn btn-primary ms-2' onClick={createOffer} disabled={!peerConnection}>Join Call</button>
-        <audio ref={localAudioRef} autoPlay muted />
-        <audio ref={remoteAudioRef} autoPlay />
+        <div className='d-flex justify-content-center'>
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<CallIcon />}
+            onClick={createOffer}
+            style={{ marginLeft: '8px' }}
+          >
+            Call
+          </Button>
+          <audio ref={localAudioRef} autoPlay muted />
+          <audio ref={remoteAudioRef} autoPlay />
+        </div>
         </>
       }
     </>
