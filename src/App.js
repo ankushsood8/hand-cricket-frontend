@@ -81,7 +81,7 @@ function App() {
       setPlayMatch(true);
       setRoomId(roomId);
       setActiveRooms(activeRooms);
-      initializePeerConnection();
+
     });
 
     socket.on('score updated', (activeRooms) => {
@@ -135,80 +135,81 @@ function App() {
         setActiveRooms([]);
         setIsDisabled(false);
       }
-    });
+    })
+
   }, []);
   
   const initializePeerConnection = async () => {
     try {
-      const pc = new RTCPeerConnection({
-        iceServers: [
-          { urls: 'stun:stun.l.google.com:19302' } // Using a public STUN server
-        ]
-      });
+        const pc = new RTCPeerConnection({
+            iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' } // Using a public STUN server
+            ]
+        });
 
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      localAudioRef.current.srcObject = stream;
-      stream.getTracks().forEach(track => pc.addTrack(track, stream));
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        localAudioRef.current.srcObject = stream;
+        stream.getTracks().forEach(track => pc.addTrack(track, stream));
 
-      pc.onicecandidate = (event) => {
-        if (event.candidate) {
-          socket.emit('candidate', event.candidate);
-        }
-      };
+        pc.onicecandidate = (event) => {
+            if (event.candidate) {
+                socket.emit('candidate', event.candidate);
+            }
+        };
 
-      pc.ontrack = (event) => {
-        if (remoteAudioRef.current) {
-          remoteAudioRef.current.srcObject = event.streams[0];
-        }
-      };
+        pc.ontrack = (event) => {
+            if (remoteAudioRef.current) {
+                remoteAudioRef.current.srcObject = event.streams[0];
+            }
+        };
 
-      socket.on('offer', async (offer) => {
-        try {
-          await pc.setRemoteDescription(new RTCSessionDescription(offer));
-          const answer = await pc.createAnswer();
-          await pc.setLocalDescription(answer);
-          socket.emit('answer', answer);
-        } catch (error) {
-          console.error('Error setting remote description or creating answer:', error);
-        }
-      });
+        socket.on('offer', async (offer) => {
+            try {
+                await pc.setRemoteDescription(new RTCSessionDescription(offer));
+                const answer = await pc.createAnswer();
+                await pc.setLocalDescription(answer);
+                socket.emit('answer', answer);
+            } catch (error) {
+                console.error('Error setting remote description or creating answer:', error);
+            }
+        });
 
-      socket.on('answer', async (answer) => {
-        try {
-          await pc.setRemoteDescription(new RTCSessionDescription(answer));
-        } catch (error) {
-          console.error('Error setting remote description:', error);
-        }
-      });
+        socket.on('answer', async (answer) => {
+            try {
+                await pc.setRemoteDescription(new RTCSessionDescription(answer));
+            } catch (error) {
+                console.error('Error setting remote description:', error);
+            }
+        });
 
-      socket.on('candidate', async (candidate) => {
-        try {
-          await pc.addIceCandidate(new RTCIceCandidate(candidate));
-        } catch (error) {
-          console.error('Error adding ice candidate:', error);
-        }
-      });
+        socket.on('candidate', async (candidate) => {
+            try {
+                await pc.addIceCandidate(new RTCIceCandidate(candidate));
+            } catch (error) {
+                console.error('Error adding ice candidate:', error);
+            }
+        });
 
-      setPeerConnection(pc); // Set peerConnection after it's fully initialized
+        setPeerConnection(pc); // Set peerConnection after it's fully initialized
     } catch (error) {
-      console.error('Error initializing peer connection:', error);
+        console.error('Error initializing peer connection:', error);
     }
-  };
+};
 
-  const createOffer = async () => {
+const createOffer = async () => {
     if (!peerConnection) {
-      console.error('Peer connection not established.');
-      return;
+        console.error('Peer connection not established.');
+        return;
     }
 
     try {
-      const offer = await peerConnection.createOffer();
-      await peerConnection.setLocalDescription(offer);
-      socket.emit('offer', offer);
+        const offer = await peerConnection.createOffer();
+        await peerConnection.setLocalDescription(offer);
+        socket.emit('offer', offer);
     } catch (error) {
-      console.error('Error creating offer:', error);
+        console.error('Error creating offer:', error);
     }
-  };
+};
 
   return (
     <>
@@ -236,6 +237,9 @@ function App() {
         <GameComponent roomId={roomId} activeRooms={activeRooms} playerMove={playerMove} isDisabled={isDisabled}></GameComponent>
         && {!isSinglePlayer &&
         <div className='d-flex justify-content-center'>
+          <Button variant="contained"
+              color="primary"
+              onClick={initializePeerConnection} >Initialize Connection to Join</Button>
           <Button
             variant="contained"
             color="primary"
