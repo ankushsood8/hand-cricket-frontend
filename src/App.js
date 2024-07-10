@@ -9,6 +9,7 @@ import HomePage from './HomePage';
 import GameComponent from './GameComponent';
 import Button from '@mui/material/Button';
 import CallIcon from '@mui/icons-material/Call';
+import CallEndIcon from '@mui/icons-material/CallEnd';
 
 
 const socket = io('https://hand-cricket-be.onrender.com')
@@ -22,6 +23,8 @@ function App() {
   const [activeRooms, setActiveRooms] = useState([{}]);
   const [isDisabled, setIsDisabled] = useState(false);
   const [isSelectMode, setSelectedMode] = useState(false);
+  const [isSinglePlayer, setSinglePlayer] = useState(false);
+  const [callJoined, setCallJoined] = useState(false);
 
   const localAudioRef = useRef(null);
   const remoteAudioRef = useRef(null);
@@ -49,6 +52,7 @@ function App() {
   const modeSelected = (mode) => {
     setSelectedMode(true);
     if (mode === 'singleplayer') {
+      setSinglePlayer(true);
       socket.emit('play with cpu', userName.current);
     }
   }
@@ -203,14 +207,24 @@ function App() {
     try {
       const offer = await peerConnection.createOffer();
       await peerConnection.setLocalDescription(offer);
+      setCallJoined(true);
       console.log('Offer created:', offer)
       socket.emit('offer', offer);
     } catch (error) {
       console.error('Error creating offer:', error);
     }
   };
-
-
+  
+  const EndCall = () => {
+    if (peerConnection) {
+      setCallJoined(false);
+      const stream = localAudioRef.current.srcObject;
+      if (stream) {
+        const tracks = stream.getTracks();
+        tracks.forEach(track => track.stop());
+      }
+    }
+  }
 
   return (
     <>
@@ -236,6 +250,7 @@ function App() {
       {playMatch &&
        <>
         <GameComponent roomId={roomId} activeRooms={activeRooms} playerMove={playerMove} isDisabled={isDisabled}></GameComponent>
+        && {!isSinglePlayer &&
         <div className='d-flex justify-content-center'>
           <Button
             variant="contained"
@@ -243,12 +258,24 @@ function App() {
             startIcon={<CallIcon />}
             onClick={createOffer}
             style={{ marginLeft: '8px' }}
+            disabled={callJoined}
           >
             Call
+          </Button>
+          <Button
+            variant="contained"
+            color="error"
+            style={{ marginLeft: '8px' }}
+            startIcon={<CallEndIcon />}
+            onClick={EndCall}
+            disabled={!callJoined}
+          >
+            End Call
           </Button>
           <audio ref={localAudioRef} autoPlay muted />
           <audio ref={remoteAudioRef} autoPlay />
         </div>
+}
         </>
       }
     </>
