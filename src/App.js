@@ -81,7 +81,7 @@ function App() {
       setPlayMatch(true);
       setRoomId(roomId);
       setActiveRooms(activeRooms);
-
+      initializePeerConnection();
     });
 
     socket.on('score updated', (activeRooms) => {
@@ -135,8 +135,7 @@ function App() {
         setActiveRooms([]);
         setIsDisabled(false);
       }
-    })
-
+    });
   }, []);
   
   const initializePeerConnection = async () => {
@@ -237,9 +236,6 @@ function App() {
         <GameComponent roomId={roomId} activeRooms={activeRooms} playerMove={playerMove} isDisabled={isDisabled}></GameComponent>
         && {!isSinglePlayer &&
         <div className='d-flex justify-content-center'>
-          <Button variant="contained"
-              color="primary"
-              onClick={initializePeerConnection} >Initialize Connection to Join</Button>
           <Button
             variant="contained"
             color="primary"
