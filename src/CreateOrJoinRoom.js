@@ -1,10 +1,12 @@
 import React from 'react';
+import { useState } from 'react';
 import { Container, Typography, Button, Grid, Paper, TextField } from '@mui/material';
 import { useSpring, animated } from 'react-spring';
 import GroupAddIcon from '@mui/icons-material/GroupAdd';
 import InputIcon from '@mui/icons-material/Input';
 
 const CreateOrJoinRoom = ({ createRoom, joinRoom, handleChangeRoomId }) => {
+  const [roomId, setRoomId] = useState('');
   const iconSpring = useSpring({
     from: { transform: 'scale(0)', opacity: 0 },
     to: { transform: 'scale(1)', opacity: 1 },
@@ -23,6 +25,11 @@ const CreateOrJoinRoom = ({ createRoom, joinRoom, handleChangeRoomId }) => {
     to: { opacity: 1 },
     config: { duration: 1000 },
   });
+  
+  const roomIdSet = (e) => {
+    setRoomId(e.target.value);
+    handleChangeRoomId(e.target.value);
+  }
 
   return (
     <animated.div style={containerSpring}>
@@ -60,13 +67,14 @@ const CreateOrJoinRoom = ({ createRoom, joinRoom, handleChangeRoomId }) => {
                   variant="outlined"
                   size="small"
                   style={{ marginBottom: '1rem' }}
-                  onChange={handleChangeRoomId}
+                  onChange={(e) => roomIdSet(e)}
                 />
                 <Button
                   variant="contained"
-                  style={{ backgroundColor: '#f50057', color: '#fff', height: '100%' }}
+                  style={{ backgroundColor: '#f50057', color: '#fff', height: '100%', opacity: roomId ? 1 : 0.5}}
                   fullWidth
                   onClick={joinRoom}
+                  disabled={!roomId}
                 >
                   <InputIcon style={{ marginRight: '0.5rem' }}  />
                   Join Room

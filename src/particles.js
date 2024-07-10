@@ -9,7 +9,7 @@ let particles = {
     particleMode: 'repulse'
 }
 
-const ParticlesComponent = React.memo(( props ) => {
+const ParticlesComponent = (( props ) => {
   useEffect(() => {
     initParticlesEngine(async (engine) => {
       await loadSlim(engine);

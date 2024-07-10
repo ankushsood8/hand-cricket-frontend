@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Container, Typography, TextField, Button, Grid, Paper } from '@mui/material';
 import { useSpring, animated } from 'react-spring';
 import GroupAddIcon from '@mui/icons-material/GroupAdd';
 import PersonIcon from '@mui/icons-material/Person';
 
 const HomePage = ({ handleChange, setUser }) => {
+  const [name, setName] = useState('');
   const iconSpring = useSpring({
     from: { transform: 'scale(0)', opacity: 0 },
     to: { transform: 'scale(1)', opacity: 1 },
@@ -17,6 +18,11 @@ const HomePage = ({ handleChange, setUser }) => {
     delay: 500,
     config: { duration: 500 },
   });
+  
+  const enterName = (e) => {
+    setName(e.target.value);
+    handleChange(e.target.value);
+  };
 
   return (
     <Container maxWidth="sm" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
@@ -38,7 +44,7 @@ const HomePage = ({ handleChange, setUser }) => {
                 label="Your Name"
                 variant="outlined"
                 size="small"
-                onChange={handleChange}
+                onChange={enterName}
               />
             </Grid>
             <Grid item xs={12} style={{ marginTop: '1rem' }}>
@@ -47,6 +53,7 @@ const HomePage = ({ handleChange, setUser }) => {
                 color="primary"
                 fullWidth
                 onClick={setUser}
+                disabled={!name}
               >
                 <PersonIcon style={{ marginRight: '0.5rem' }} />
                 Start Game

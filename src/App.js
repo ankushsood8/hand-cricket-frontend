@@ -13,7 +13,8 @@ import CallIcon from '@mui/icons-material/Call';
 
 const socket = io('https://hand-cricket-be.onrender.com')
 function App() {
-  const [userName, setUserName] = useState('');
+  const userName = useRef('');
+  const joinRoomId = useRef('');
   const [roomId, setRoomId] = useState('');
   const [playMatch, setPlayMatch] = useState(false);
   const [userRegistered, setUserRegistered] = useState(false);
@@ -21,8 +22,7 @@ function App() {
   const [activeRooms, setActiveRooms] = useState([{}]);
   const [isDisabled, setIsDisabled] = useState(false);
   const [isSelectMode, setSelectedMode] = useState(false);
-  const [joinRoomId, setJoinRoomId] = useState('');
-  
+
   const localAudioRef = useRef(null);
   const remoteAudioRef = useRef(null);
   const [peerConnection, setPeerConnection] = useState(null);
@@ -33,12 +33,12 @@ function App() {
   }
 
   const createRoom = () => {
-    socket.emit('create room', userName);
+    socket.emit('create room', userName.current);
     setRoomCreated(true);
   }
 
   const joinRoom = () => {
-    socket.emit('join room', userName, joinRoomId);
+    socket.emit('join room', userName.current, joinRoomId.current);
   }
 
   const playerMove = (move) => {
@@ -49,16 +49,16 @@ function App() {
   const modeSelected = (mode) => {
     setSelectedMode(true);
     if (mode === 'singleplayer') {
-      socket.emit('play with cpu', userName);
+      socket.emit('play with cpu', userName.current);
     }
   }
 
   const handleChange = (event) => {
-    setUserName(event.target.value);
+    userName.current = event;
   };
 
   const handleChangeRoomId = (event) => {
-    setJoinRoomId(event.target.value);
+    joinRoomId.current = event;
   }
 
 
@@ -99,7 +99,7 @@ function App() {
         socket.emit('play again', roomId);
       }
       else {
-        setUserName('');
+        userName.current = '';
         setUserRegistered(false);
         setPlayMatch(false);
         setRoomCreated(false);
@@ -126,7 +126,7 @@ function App() {
         socket.emit('play again', roomId);
       }
       else {
-        setUserName('');
+        userName.current = '';
         setUserRegistered(false);
         setPlayMatch(false);
         setRoomCreated(false);
