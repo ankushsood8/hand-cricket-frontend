@@ -197,7 +197,6 @@ function App() {
   };
 
   const createOffer = async () => {
-    initializePeerConnection();
     if (!peerConnection) {
       console.error('Peer connection not established.');
       return;
