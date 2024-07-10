@@ -9,6 +9,7 @@ import HomePage from './HomePage';
 import GameComponent from './GameComponent';
 import Button from '@mui/material/Button';
 import CallIcon from '@mui/icons-material/Call';
+import CallEndIcon from '@mui/icons-material/CallEnd';
 
 
 const socket = io('https://hand-cricket-be.onrender.com')
@@ -205,13 +206,13 @@ function App() {
     try {
       const offer = await peerConnection.createOffer();
       await peerConnection.setLocalDescription(offer);
+      setCallJoined(true);
       console.log('Offer created:', offer)
       socket.emit('offer', offer);
     } catch (error) {
       console.error('Error creating offer:', error);
     }
   };
-
 
   return (
     <>
@@ -248,6 +249,16 @@ function App() {
             disabled={callJoined}
           >
             Call
+          </Button>
+          <Button
+            variant="contained"
+            color="error"
+            style={{ marginLeft: '8px' }}
+            startIcon={<CallEndIcon />}
+            onClick={EndCall}
+            disabled={!callJoined}
+          >
+            End Call
           </Button>
           <audio ref={localAudioRef} autoPlay muted />
           <audio ref={remoteAudioRef} autoPlay />
