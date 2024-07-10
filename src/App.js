@@ -22,6 +22,7 @@ function App() {
   const [activeRooms, setActiveRooms] = useState([{}]);
   const [isDisabled, setIsDisabled] = useState(false);
   const [isSelectMode, setSelectedMode] = useState(false);
+  const [isSinglePlayer, setSinglePlayer] = useState(false);
 
   const localAudioRef = useRef(null);
   const remoteAudioRef = useRef(null);
@@ -49,6 +50,7 @@ function App() {
   const modeSelected = (mode) => {
     setSelectedMode(true);
     if (mode === 'singleplayer') {
+      setSinglePlayer(true);
       socket.emit('play with cpu', userName.current);
     }
   }
@@ -211,7 +213,6 @@ function App() {
   };
 
 
-
   return (
     <>
       <ParticlesComponent id='particles'></ParticlesComponent>
@@ -236,6 +237,7 @@ function App() {
       {playMatch &&
        <>
         <GameComponent roomId={roomId} activeRooms={activeRooms} playerMove={playerMove} isDisabled={isDisabled}></GameComponent>
+        && {!isSinglePlayer &&
         <div className='d-flex justify-content-center'>
           <Button
             variant="contained"
@@ -243,12 +245,14 @@ function App() {
             startIcon={<CallIcon />}
             onClick={createOffer}
             style={{ marginLeft: '8px' }}
+            disabled={callJoined}
           >
             Call
           </Button>
           <audio ref={localAudioRef} autoPlay muted />
           <audio ref={remoteAudioRef} autoPlay />
         </div>
+}
         </>
       }
     </>
