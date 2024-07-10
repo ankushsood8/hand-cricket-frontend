@@ -228,7 +228,7 @@ function App() {
 
   const handleOffer = async (pc, offer) => {
     try {
-      if (pc.signalingState === 'stable') {
+      if (pc.signalingState === 'have-local-offer') {
         await pc.setRemoteDescription(new RTCSessionDescription(offer));
         const answer = await pc.createAnswer();
         await pc.setLocalDescription(answer);
