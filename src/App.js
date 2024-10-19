@@ -24,8 +24,8 @@ function App() {
   const [isSelectMode, setSelectedMode] = useState(false);
   const [isSinglePlayer, setSinglePlayer] = useState(false);
 
-  const localAudioRef = useRef(null);
-  const remoteAudioRef = useRef(null);
+  const localVideoRef = useRef(null);
+  const remoteVideoRef = useRef(null);
   const [peerConnection, setPeerConnection] = useState(null);
 
 
@@ -147,8 +147,8 @@ function App() {
             ]
         });
 
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        localAudioRef.current.srcObject = stream;
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+        localVideoRef.current.srcObject = stream;
         stream.getTracks().forEach(track => pc.addTrack(track, stream));
 
         pc.onicecandidate = (event) => {
@@ -158,8 +158,8 @@ function App() {
         };
 
         pc.ontrack = (event) => {
-            if (remoteAudioRef.current) {
-                remoteAudioRef.current.srcObject = event.streams[0];
+            if (remoteVideoRef.current) {
+                remoteVideoRef.current.srcObject = event.streams[0];
             }
         };
 
@@ -250,8 +250,8 @@ const createOffer = async () => {
           >
             Call
           </Button>
-          <audio ref={localAudioRef} autoPlay muted />
-          <audio ref={remoteAudioRef} autoPlay />
+          <video ref={localVideoRef} autoPlay muted style={{ width: '300px', marginRight: '10px' }} />
+          <video ref={remoteVideoRef} autoPlay style={{ width: '300px' }} />
         </div>
 }
         </>
